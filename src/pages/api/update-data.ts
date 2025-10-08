@@ -10,7 +10,12 @@ export const POST: APIRoute = async ({ request, redirect }) => {
   }
 
   const dataUntukUpdate = JSON.parse(dataString);
-  const db = await mysql.createConnection({ /* ... detail koneksi DB Anda ... */ });
+  const db = await mysql.createConnection({
+      host: import.meta.env.DB_HOST,
+      user: import.meta.env.DB_USER,
+      password: import.meta.env.DB_PASSWORD,
+      database: import.meta.env.DB_NAME,
+  });
 
   try {
     await db.beginTransaction();
@@ -27,6 +32,6 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     await db.rollback();
     await db.end();
     console.error(error);
-    return new Response("Gagal menyimpan data ke database", { status: 500 });
+    return new Response(`Gagal menyimpan data ke database: ${error.message}`, { status: 500 });
   }
 };
