@@ -1,0 +1,37 @@
+---
+import Layout from '../layouts/Layout.astro';
+---
+<Layout title="Selesai - SonusHUB Updater">
+  <style>
+    .success-wrapper {
+      max-width: 550px;
+      margin: 0 auto;
+      text-align: center;
+    }
+    .success-icon {
+      font-size: 4rem;
+      margin-bottom: 1.5rem;
+    }
+    .hgroup-wrapper {
+      margin-bottom: 2.5rem;
+    }
+    a[role="button"] {
+      width: 100%;
+      max-width: 300px; /* Limit button width */
+      margin-top: 2rem;
+    }
+  </style>
+
+  <div class="success-wrapper">
+    <article>
+        <div class="success-icon">✅</div>
+        <div class="hgroup-wrapper">
+            <hgroup>
+                <h2>Pembaruan Selesai</h2>
+                <p>Semua data produk telah berhasil diperbarui di database.</p>
+            </hgroup>
+        </div>
+        <a href="/" role="button">Lakukan Pembaruan Lain</a>
+    </article>
+  </div>
+</Layout>
