@@ -1,11 +1,44 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
 
-// Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
-// Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
+<Layout title="Updater Harga Produk">
+  <style>
+      .theme-switcher { position: absolute; top: 1rem; right: 1rem; }
+      main.container { max-width: 600px; }
+  </style>
 
-<Layout>
-	<Welcome />
+  <div class="theme-switcher">
+    <fieldset>
+      <label for="light"><input type="radio" id="light" name="theme" value="light">☀️</label>
+      <label for="dark"><input type="radio" id="dark" name="theme" value="dark">🌙</label>
+    </fieldset>
+  </div>
+
+  <main class="container">
+    <article>
+      <header>
+        <a href="/api/auth/logout" role="button" class="outline" style="float: right;">Logout</a>
+        <h2>🚀 Updater Harga Produk</h2>
+        <p>Selamat datang! Silakan perbarui harga produk.</p>
+      </header>
+      
+      <form action="/konfirmasi" method="post" enctype="multipart/form-data">
+        <label for="fileCsv">
+            <strong>1. Pilih File CSV</strong>
+            <small>Format: id_produk, harga_baru (pemisah , atau ;)</small>
+        </label>
+        <input type="file" name="fileCsv" id="fileCsv" accept=".csv" required>
+
+        <fieldset>
+          <label for="gunakan_ai">
+            <input type="checkbox" id="gunakan_ai" name="gunakan_ai" value="yes" checked>
+            <strong>2. Gunakan Validasi AI</strong>
+          </label>
+        </fieldset>
+
+        <button type="submit" name="submit">Proses & Lanjutkan →</button>
+      </form>
+    </article>
+  </main>
 </Layout>

@@ -1,0 +1,38 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+// Jika user sudah login, arahkan ke halaman utama
+if (Astro.cookies.get('session')) {
+  return Astro.redirect('/');
+}
+
+// Cek jika ada pesan error dari query parameter
+const url = new URL(Astro.request.url);
+const error = url.searchParams.get('error');
+---
+<Layout title="Login - Updater Harga">
+  <style>
+    body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
+    main.container { max-width: 450px; }
+    article { padding: 2rem; }
+    .error { color: var(--pico-del-color); margin-bottom: 1rem; text-align: center;}
+  </style>
+  <main class="container">
+    <article>
+      <h2 style="text-align: center;">Selamat Datang</h2>
+      <p style="text-align: center;">Silakan login untuk mengakses Updater Harga.</p>
+      
+      <form action="/api/auth/login" method="post">
+        <label for="username">Username</label>
+        <input type="text" id="username" name="username" placeholder="Username" required>
+
+        <label for="password">Password</label>
+        <input type="password" id="password" name="password" placeholder="Password" required>
+
+        {error && <p class="error">{error}</p>}
+
+        <button type="submit">Login</button>
+      </form>
+    </article>
+  </main>
+</Layout>
