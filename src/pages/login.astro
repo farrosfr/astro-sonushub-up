@@ -1,38 +1,62 @@
 ---
+// File: src/pages/login.astro
 import Layout from '../layouts/Layout.astro';
 
-// Jika user sudah login, arahkan ke halaman utama
-if (Astro.cookies.get('session')) {
+// Arahkan ke halaman utama jika sudah ada session
+if (Astro.cookies.has('session-token')) {
   return Astro.redirect('/');
 }
-
-// Cek jika ada pesan error dari query parameter
-const url = new URL(Astro.request.url);
-const error = url.searchParams.get('error');
 ---
+
 <Layout title="Login - Updater Harga">
   <style>
     body { display: flex; justify-content: center; align-items: center; min-height: 100vh; }
     main.container { max-width: 450px; }
     article { padding: 2rem; }
-    .error { color: var(--pico-del-color); margin-bottom: 1rem; text-align: center;}
+    .error { color: var(--pico-del-color); margin-bottom: 1rem; text-align: center; }
   </style>
   <main class="container">
     <article>
       <h2 style="text-align: center;">Selamat Datang</h2>
       <p style="text-align: center;">Silakan login untuk mengakses Updater Harga.</p>
       
-      <form action="/api/auth/login" method="post">
+      <form id="login-form">
         <label for="username">Username</label>
         <input type="text" id="username" name="username" placeholder="Username" required>
 
         <label for="password">Password</label>
         <input type="password" id="password" name="password" placeholder="Password" required>
 
-        {error && <p class="error">{error}</p>}
+        <p id="error-message" class="error" hidden></p>
 
         <button type="submit">Login</button>
       </form>
     </article>
   </main>
 </Layout>
+
+<script>
+  // PERBAIKAN: Impor 'actions' di sini untuk digunakan di client-side
+  import { actions } from 'astro:actions';
+
+  const form = document.getElementById('login-form') as HTMLFormElement;
+  const errorMessage = document.getElementById('error-message');
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    if (!errorMessage) return; // Pastikan elemen ada
+
+    const formData = new FormData(form);
+    
+    // Panggil action 'login' dengan data dari form
+    const result = await actions.login.safe(formData);
+
+    if (result.data?.error) {
+      // Jika ada error dari server, tampilkan
+      errorMessage.textContent = result.data.error;
+      errorMessage.hidden = false;
+    } 
+    // Jika berhasil, redirect akan ditangani oleh server,
+    // dan halaman akan otomatis dialihkan.
+  });
+</script>

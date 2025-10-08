@@ -1,56 +1,20 @@
 ---
-interface Props {
-	title: string;
-}
-
-const { title } = Astro.props;
-const currentYear = new Date().getFullYear();
+// Bagian frontmatter (---) dari Layout.astro Anda tetap sama
 ---
-
 <!doctype html>
 <html lang="id" data-theme="light">
 	<head>
-		<meta charset="UTF-8" />
-		<meta name="description" content="Astro description" />
-		<meta name="viewport" content="width=device-width" />
-		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
-		<meta name="generator" content={Astro.generator} />
-		<title>{title}</title>
-		<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@2/css/pico.min.css"/>
-		<style>
-			body {
-				padding-bottom: 5rem; /* Memberi ruang untuk footer */
-			}
-			main.container {
-				padding-top: 2rem;
-			}
-			/* Style untuk footer yang menempel di bawah */
-			.site-footer {
-				position: fixed;
-				bottom: 0;
-				left: 0;
-				right: 0;
-				padding: 1rem;
-				text-align: center;
-				border-top: 1px solid var(--pico-muted-border-color);
-				background-color: var(--pico-card-background-color);
-				z-index: 10;
-			}
-		</style>
-	</head>
+		</head>
 	<body>
 		<slot />
 		<footer class="site-footer">
-			<small>
-				All rights reserved © {currentYear} sonushub.id | Dev by <a href="https://farrosfr.com" target="_blank">FarrosFR</a>
-			</small>
-		</footer>
+			</footer>
+
 		<script>
-			// Script dark mode
 			const themeSwitcher = document.querySelectorAll('input[name="theme"]');
 			const html = document.documentElement;
 
-			function setTheme(theme) {
+			function setTheme(theme: string) { // Tambahkan tipe 'string'
 				html.setAttribute('data-theme', theme);
 				localStorage.setItem('theme', theme);
 			}
@@ -58,7 +22,8 @@ const currentYear = new Date().getFullYear();
 			document.addEventListener('DOMContentLoaded', () => {
 				const savedTheme = localStorage.getItem('theme') || 'light';
 				setTheme(savedTheme);
-				const currentRadio = document.querySelector(`input[value="${savedTheme}"]`);
+				// Beri tahu TS bahwa ini adalah elemen input
+				const currentRadio = document.querySelector<HTMLInputElement>(`input[value="${savedTheme}"]`);
 				if (currentRadio) {
 					currentRadio.checked = true;
 				}
@@ -66,7 +31,11 @@ const currentYear = new Date().getFullYear();
 
 			themeSwitcher.forEach(switcher => {
 				switcher.addEventListener('change', (event) => {
-					setTheme(event.target.value);
+					// Cek jika target ada dan merupakan elemen input
+					const target = event.target as HTMLInputElement;
+					if (target) {
+						setTheme(target.value);
+					}
 				});
 			});
 		</script>
