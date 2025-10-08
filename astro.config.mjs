@@ -5,8 +5,5 @@ export default defineConfig({
   output: 'server',
   adapter: node({
     mode: 'standalone',
-  }),
-  experimental: {
-    actions: true, // Aktifkan Actions di sini
-  },
+  })
 });
