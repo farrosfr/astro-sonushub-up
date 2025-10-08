@@ -1,4 +1,5 @@
----
+--- 
+// --- FRONTMATTER (logic) remains the same ---
 import Layout from '../layouts/Layout.astro';
 import { marked } from 'marked';
 import mysql from 'mysql2/promise';
@@ -94,16 +95,18 @@ if (Astro.request.method === 'POST') {
     error = e.message;
   }
 } else {
-    // Redirect or show message if accessed directly via GET
     return Astro.redirect('/');
 }
 ---
-<Layout title="Konfirmasi Update Harga">
+<Layout title="Konfirmasi - SonusHUB Updater">
   <style>
-    article {
-      padding: 2rem;
-      border-radius: 1rem;
-      box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    .hgroup-wrapper {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .confirmation-wrapper {
+        max-width: 800px;
+        margin: 0 auto;
     }
     .error-message {
         text-align: center;
@@ -113,15 +116,26 @@ if (Astro.request.method === 'POST') {
         color: var(--pico-del-color);
     }
     table {
-        margin-top: 1.5rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 2rem;
+    }
+    table th {
+        color: var(--h3-color);
+    }
+    table tbody tr:nth-child(odd) {
+        background-color: var(--form-element-background-color);
+    }
+    .price-old {
+        opacity: 0.8;
+        text-decoration: line-through;
+    }
+    .price-new {
+        font-weight: bold;
+        color: var(--primary);
     }
     .ai-summary {
-        border: 1px solid var(--pico-primary-border);
-        padding: 1.5rem;
-        border-radius: 0.5rem;
+        border-top: 1px solid var(--card-border-color);
+        padding-top: 2rem;
         margin-top: 2rem;
-        background-color: var(--pico-primary-background);
     }
     .ai-summary h3 {
         margin-top: 0;
@@ -129,24 +143,28 @@ if (Astro.request.method === 'POST') {
     .model-info {
         font-size: 0.9rem;
         text-align: right;
-        opacity: 0.8;
+        opacity: 0.7;
         margin-top: 1rem;
     }
     footer {
         display: flex;
         justify-content: space-between;
-        margin-top: 2rem;
+        align-items: center;
+        margin-top: 2.5rem;
+        border-top: 1px solid var(--card-border-color);
+        padding-top: 2rem;
     }
   </style>
-  <main class="container">
-    <article>
-        <header>
-            <hgroup>
-                <h2>Langkah 2: Konfirmasi Perubahan</h2>
-                <p>Periksa data di bawah ini sebelum menyimpan perubahan secara permanen.</p>
-            </hgroup>
-        </header>
 
+<div class="confirmation-wrapper">
+    <div class="hgroup-wrapper">
+        <hgroup>
+            <h2>Langkah 2: Konfirmasi Perubahan</h2>
+            <p>Periksa data di bawah ini sebelum menyimpan perubahan secara permanen.</p>
+        </hgroup>
+    </div>
+
+    <article>
         {error ? (
           <div class="error-message">
             <h3>Terjadi Kesalahan</h3>
@@ -156,7 +174,7 @@ if (Astro.request.method === 'POST') {
         ) : (
           <form action="/api/update-data" method="post">
             
-            <h3>Data yang Akan Diperbarui</h3>
+            <h3>Data yang Akan Diperbarui ({dataUntukUpdate.length} produk)</h3>
             <table>
               <thead>
                 <tr>
@@ -168,9 +186,9 @@ if (Astro.request.method === 'POST') {
               <tbody>
                 {dataUntukUpdate.map(item => (
                   <tr>
-                    <td>{item.id}</td>
-                    <td>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.harga_lama)}</td>
-                    <td><strong>{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR' }).format(item.harga_baru)}</strong></td>
+                    <td><code>{item.id}</code></td>
+                    <td class="price-old">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_lama)}</td>
+                    <td class="price-new">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_baru)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -179,21 +197,24 @@ if (Astro.request.method === 'POST') {
             {gunakanAI && (
               <div class="ai-summary">
                 <h3>📝 Rangkuman & Saran dari AI</h3>
-                <div set:html={marked.parse(rangkumanDariAI)} />
-              </div>
-              <div class="model-info">
+                <div class="prose" set:html={marked.parse(rangkumanDariAI)} />
+                <div class="model-info">
                   Model AI: <strong>{modelAI}</strong> | Token: <strong>{tokenDigunakan}</strong>
+                </div>
               </div>
             )}
             
             <input type="hidden" name="data_update" value={JSON.stringify(dataUntukUpdate)}>
 
             <footer>
-              <a href="/" role="button" class="secondary outline">Batal</a>
-              <button type="submit">YA, SIMPAN PERUBAHAN</button>
+                <span>Total <strong>{dataUntukUpdate.length} produk</strong> akan diperbarui.</span>
+                <div>
+                    <a href="/" role="button" class="secondary outline">Batal</a>
+                    <button type="submit">YA, SIMPAN PERUBAHAN</button>
+                </div>
             </footer>
           </form>
         )}
     </article>
-  </main>
+</div>
 </Layout>

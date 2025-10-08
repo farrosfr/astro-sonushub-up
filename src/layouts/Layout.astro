@@ -1,43 +1,202 @@
 ---
-// Bagian frontmatter (---) dari Layout.astro Anda tetap sama
+interface Props {
+	title: string;
+}
+
+const { title } = Astro.props;
 ---
 <!doctype html>
-<html lang="id" data-theme="light">
+<html lang="id">
 	<head>
-		</head>
+		<meta charset="UTF-8" />
+		<meta name="description" content="SonusHUB Product Updater" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+        
+        <!-- Google Fonts -->
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700&display=swap" rel="stylesheet">
+
+        <!-- Pico.css (lightweight, for base structure) -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
+	</head>
 	<body>
-		<slot />
-		<footer class="site-footer">
-			</footer>
+        <header class="container">
+            <nav>
+                <ul>
+                    <li><img src="/favicon.svg" alt="Logo" style="width: 32px; margin-right: 1rem;"/></li>
+                    <li><strong>SonusHUB Updater</strong></li>
+                </ul>
+                <ul>
+                    <li>
+                        <details role="list" dir="rtl">
+                            <summary aria-haspopup="listbox" role="link">Theme</summary>
+                            <ul role="listbox">
+                                <li><a href="#" data-theme-switcher="light">Light</a></li>
+                                <li><a href="#" data-theme-switcher="dark">Dark</a></li>
+                                <li><a href="#" data-theme-switcher="auto">Auto</a></li>
+                            </ul>
+                        </details>
+                    </li>
+                </ul>
+            </nav>
+        </header>
+
+		<main class="container">
+            <slot />
+        </main>
+
+        <footer class="container">
+            <small>Dibuat dengan ❤️ oleh Tim SonusHUB</small>
+        </footer>
 
 		<script>
-			const themeSwitcher = document.querySelectorAll('input[name="theme"]');
-			const html = document.documentElement;
+            const theme = {
+                init() {
+                    this.themeToggle = document.querySelector('details[role="list"]');
+                    this.themeLinks = document.querySelectorAll('a[data-theme-switcher]');
+                    this.currentTheme = this.getTheme();
 
-			function setTheme(theme: string) { // Tambahkan tipe 'string'
-				html.setAttribute('data-theme', theme);
-				localStorage.setItem('theme', theme);
-			}
+                    this.applyTheme(this.currentTheme);
 
-			document.addEventListener('DOMContentLoaded', () => {
-				const savedTheme = localStorage.getItem('theme') || 'light';
-				setTheme(savedTheme);
-				// Beri tahu TS bahwa ini adalah elemen input
-				const currentRadio = document.querySelector<HTMLInputElement>(`input[value="${savedTheme}"]`);
-				if (currentRadio) {
-					currentRadio.checked = true;
-				}
-			});
+                    this.themeLinks.forEach(link => {
+                        link.addEventListener('click', (e) => {
+                            e.preventDefault();
+                            const newTheme = e.target.dataset.themeSwitcher;
+                            this.setTheme(newTheme);
+                            // Close dropdown
+                            if (this.themeToggle) {
+                                this.themeToggle.removeAttribute('open');
+                            }
+                        });
+                    });
+                },
+                getTheme() {
+                    return localStorage.getItem('theme') || 'auto';
+                },
+                setTheme(newTheme) {
+                    localStorage.setItem('theme', newTheme);
+                    this.applyTheme(newTheme);
+                },
+                applyTheme(theme) {
+                    let themeToApply = theme;
+                    if (theme === 'auto') {
+                        themeToApply = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                    }
+                    document.documentElement.setAttribute('data-theme', themeToApply);
+                }
+            };
+            theme.init();
 
-			themeSwitcher.forEach(switcher => {
-				switcher.addEventListener('change', (event) => {
-					// Cek jika target ada dan merupakan elemen input
-					const target = event.target as HTMLInputElement;
-					if (target) {
-						setTheme(target.value);
-					}
-				});
-			});
+            // Listen for system theme changes if set to 'auto'
+            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
+                if (theme.getTheme() === 'auto') {
+                    theme.applyTheme('auto');
+                }
+            });
 		</script>
+        <style is:global>
+            :root {
+                --font-family: 'Inter', sans-serif, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+                --primary: #007bff;
+                --primary-hover: #0069d9;
+                --spacing: 1rem;
+                --border-radius: 0.5rem;
+            }
+
+            /* Dark Theme (Default) */
+            html {
+                --background-color: #121212;
+                --color: #a0a0a0;
+                --h1-color: #ffffff;
+                --h2-color: #f0f0f0;
+                --h3-color: #e0e0e0;
+                --card-background-color: #1e1e1e;
+                --card-border-color: #2c2c2c;
+                --form-element-background-color: #252525;
+                --form-element-border-color: #383838;
+                --form-element-focus-color: var(--primary);
+                --pico-primary: var(--primary) !important;
+                --pico-primary-hover: var(--primary-hover) !important;
+            }
+
+            /* Light Theme */
+            html[data-theme="light"] {
+                --background-color: #f4f5f7;
+                --color: #585858;
+                --h1-color: #121212;
+                --h2-color: #242424;
+                --h3-color: #363636;
+                --card-background-color: #ffffff;
+                --card-border-color: #e0e0e0;
+                --form-element-background-color: #f0f0f0;
+                --form-element-border-color: #dcdcdc;
+            }
+
+            body {
+                font-family: var(--font-family);
+                background-color: var(--background-color);
+                color: var(--color);
+                transition: background-color 0.2s ease-in-out, color 0.2s ease-in-out;
+            }
+
+            main {
+                padding-top: 2rem;
+                padding-bottom: 4rem;
+            }
+
+            header, footer {
+                padding: 1rem 0;
+                border-bottom: 1px solid var(--card-border-color);
+            }
+            footer {
+                border-top: 1px solid var(--card-border-color);
+                border-bottom: none;
+                text-align: center;
+                margin-top: 2rem;
+            }
+
+            /* Pico Overrides */
+            body, h1, h2, h3, h4, h5, h6, p {
+                color: var(--color);
+            }
+            h1 { color: var(--h1-color); }
+            h2 { color: var(--h2-color); }
+            h3 { color: var(--h3-color); }
+
+            article {
+                background-color: var(--card-background-color);
+                border: 1px solid var(--card-border-color);
+                border-radius: var(--border-radius);
+                padding: calc(var(--spacing) * 2);
+                box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+                transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
+            }
+
+            input, select, textarea, fieldset {
+                background-color: var(--form-element-background-color) !important;
+                border-color: var(--form-element-border-color) !important;
+                color: var(--color) !important;
+            }
+
+            /* New Theme Switcher Dropdown */
+            details[role="list"] summary {
+                color: var(--color);
+            }
+            details[role="list"] ul {
+                background-color: var(--card-background-color);
+                border-color: var(--card-border-color);
+            }
+            details[role="list"] a {
+                color: var(--color);
+            }
+             details[role="list"] a:hover {
+                background-color: var(--form-element-background-color);
+            }
+
+        </style>
 	</body>
 </html>

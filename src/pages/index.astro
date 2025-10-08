@@ -1,44 +1,114 @@
 ---
 import Layout from '../layouts/Layout.astro';
-
 ---
-<Layout title="Updater Harga Produk">
+<Layout title="Mulai - SonusHUB Updater">
   <style>
-      .theme-switcher { position: absolute; top: 1rem; right: 1rem; }
-      main.container { max-width: 600px; }
+    .hgroup-wrapper {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+    .form-wrapper {
+      max-width: 550px;
+      margin: 0 auto;
+    }
+    .form-wrapper label {
+      font-weight: 500;
+    }
+    .form-wrapper small {
+      display: block;
+      margin-top: 0.25rem;
+      opacity: 0.9;
+    }
+    .form-wrapper button {
+      width: 100%;
+      padding: 0.85rem;
+      font-weight: 500;
+    }
+    .file-input-wrapper {
+      border: 2px dashed var(--form-element-border-color);
+      border-radius: var(--border-radius);
+      padding: 2rem;
+      text-align: center;
+      cursor: pointer;
+      transition: border-color 0.2s ease, background-color 0.2s ease;
+    }
+    .file-input-wrapper:hover {
+      border-color: var(--primary);
+      background-color: var(--form-element-background-color);
+    }
+    .file-input-wrapper input[type="file"] {
+      display: none;
+    }
+    .ai-toggle {
+        margin-top: 1.5rem;
+    }
   </style>
 
-  <div class="theme-switcher">
-    <fieldset>
-      <label for="light"><input type="radio" id="light" name="theme" value="light">☀️</label>
-      <label for="dark"><input type="radio" id="dark" name="theme" value="dark">🌙</label>
-    </fieldset>
-  </div>
+  <div class="form-wrapper">
+    <div class="hgroup-wrapper">
+        <hgroup>
+            <h2>🚀 Mulai Proses Pembaruan</h2>
+            <p>Unggah file CSV Anda untuk memulai pembaruan harga produk secara massal.</p>
+        </hgroup>
+    </div>
 
-  <main class="container">
     <article>
-      <header>
-        <a href="/api/auth/logout" role="button" class="outline" style="float: right;">Logout</a>
-        <h2>🚀 Updater Harga Produk</h2>
-        <p>Selamat datang! Silakan perbarui harga produk.</p>
-      </header>
-      
       <form action="/konfirmasi" method="post" enctype="multipart/form-data">
-        <label for="fileCsv">
-            <strong>1. Pilih File CSV</strong>
-            <small>Format: id_produk, harga_baru (pemisah , atau ;)</small>
+        
+        <label for="fileCsv" class="file-input-wrapper" id="file-drop-zone">
+            <strong>Klik untuk memilih file atau jatuhkan file di sini</strong>
+            <small>Hanya file .csv yang diterima</small>
+            <input type="file" name="fileCsv" id="fileCsv" accept=".csv" required>
         </label>
-        <input type="file" name="fileCsv" id="fileCsv" accept=".csv" required>
+        <small id="file-name-display" style="text-align: center; margin-top: 1rem;"></small>
 
-        <fieldset>
+        <fieldset class="ai-toggle">
           <label for="gunakan_ai">
             <input type="checkbox" id="gunakan_ai" name="gunakan_ai" value="yes" checked>
-            <strong>2. Gunakan Validasi AI</strong>
+            Gunakan Validasi AI untuk saran dan analisis
           </label>
         </fieldset>
 
-        <button type="submit" name="submit">Proses & Lanjutkan →</button>
+        <button type="submit" name="submit">
+            Proses & Lanjutkan →
+        </button>
       </form>
     </article>
-  </main>
+  </div>
+
+  <script>
+    const fileInput = document.getElementById('fileCsv');
+    const dropZone = document.getElementById('file-drop-zone');
+    const fileNameDisplay = document.getElementById('file-name-display');
+
+    if (fileInput && dropZone && fileNameDisplay) {
+        fileInput.addEventListener('change', () => {
+            if (fileInput.files.length > 0) {
+                fileNameDisplay.textContent = `File dipilih: ${fileInput.files[0].name}`;
+            } else {
+                fileNameDisplay.textContent = '';
+            }
+        });
+
+        dropZone.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--primary)';
+        });
+
+        dropZone.addEventListener('dragleave', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--form-element-border-color)';
+        });
+
+        dropZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            dropZone.style.borderColor = 'var(--form-element-border-color)';
+            if (e.dataTransfer.files.length > 0) {
+                fileInput.files = e.dataTransfer.files;
+                const changeEvent = new Event('change');
+                fileInput.dispatchEvent(changeEvent);
+            }
+        });
+    }
+  </script>
 </Layout>
