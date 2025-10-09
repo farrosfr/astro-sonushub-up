@@ -54,34 +54,53 @@ const { title } = Astro.props;
         </footer>
 
 		<script>
-            const theme = {
+            interface ThemeManager {
+                themeToggle: HTMLDetailsElement | null;
+                themeLinks: NodeListOf<HTMLAnchorElement>;
+                currentTheme: string;
+                init(): void;
+                getTheme(): string;
+                setTheme(newTheme: string): void;
+                applyTheme(theme: string): void;
+            }
+
+            const theme: ThemeManager = {
+                themeToggle: null,
+                themeLinks: document.querySelectorAll('a[data-theme-switcher]'),
+                currentTheme: 'auto',
+
                 init() {
                     this.themeToggle = document.querySelector('details[role="list"]');
-                    this.themeLinks = document.querySelectorAll('a[data-theme-switcher]');
                     this.currentTheme = this.getTheme();
-
                     this.applyTheme(this.currentTheme);
 
                     this.themeLinks.forEach(link => {
-                        link.addEventListener('click', (e) => {
+                        link.addEventListener('click', e => {
                             e.preventDefault();
-                            const newTheme = e.target.dataset.themeSwitcher;
-                            this.setTheme(newTheme);
-                            // Close dropdown
+                            const target = e.target as HTMLAnchorElement;
+                            const newTheme = target.dataset.themeSwitcher;
+
+                            if (newTheme) {
+                                this.setTheme(newTheme);
+                            }
+                            
                             if (this.themeToggle) {
                                 this.themeToggle.removeAttribute('open');
                             }
                         });
                     });
                 },
+
                 getTheme() {
                     return localStorage.getItem('theme') || 'auto';
                 },
-                setTheme(newTheme) {
+
+                setTheme(newTheme: string) {
                     localStorage.setItem('theme', newTheme);
                     this.applyTheme(newTheme);
                 },
-                applyTheme(theme) {
+
+                applyTheme(theme: string) {
                     let themeToApply = theme;
                     if (theme === 'auto') {
                         themeToApply = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
@@ -89,9 +108,9 @@ const { title } = Astro.props;
                     document.documentElement.setAttribute('data-theme', themeToApply);
                 }
             };
+            
             theme.init();
 
-            // Listen for system theme changes if set to 'auto'
             window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
                 if (theme.getTheme() === 'auto') {
                     theme.applyTheme('auto');
