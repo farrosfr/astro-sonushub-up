@@ -27,10 +27,13 @@ export const POST: APIRoute = async ({ request, redirect }) => {
       const min_qty = item.min_qty;
 
       await db.execute(
-        'UPDATE products SET lowest_price = ?, highest_price = ?, stock = ?, unit = ?, min_qty = ? WHERE id = ?',
-        [hargaBaru, hargaBaru, stock, unit, min_qty, id]
+        'UPDATE products SET lowest_price = ?, highest_price = ?, unit = ?, min_qty = ? WHERE id = ?',
+        [hargaBaru, hargaBaru, unit, min_qty, id]
       );
-      await db.execute('UPDATE product_variations SET price = ? WHERE product_id = ?', [hargaBaru, id]);
+      await db.execute(
+        'UPDATE product_variations SET price = ?, current_stock = ? WHERE product_id = ?',
+        [hargaBaru, stock, id]
+      );
     }
     await db.commit();
     await db.end();

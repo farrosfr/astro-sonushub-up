@@ -51,20 +51,20 @@ if (Astro.request.method === 'POST') {
       const idProduk = record.id_produk || record.ID;
       if (!idProduk) continue;
 
-      const [priceRows]: any = await db.execute('SELECT price AS harga_lama FROM product_variations WHERE product_id = ?', [idProduk]);
-      const [productRows]: any = await db.execute('SELECT stock AS stock_lama, unit AS unit_lama, min_qty AS min_qty_lama FROM products WHERE id = ?', [idProduk]);
+      const [variationRows]: any = await db.execute('SELECT price AS harga_lama, current_stock AS stock_lama FROM product_variations WHERE product_id = ?', [idProduk]);
+      const [productRows]: any = await db.execute('SELECT unit AS unit_lama, min_qty AS min_qty_lama FROM products WHERE id = ?', [idProduk]);
       
-      if (priceRows.length > 0 && productRows.length > 0) {
+      if (variationRows.length > 0 && productRows.length > 0) {
         dataUntukUpdate.push({
           id: idProduk,
           // Old values from DB for display
-          harga_lama: priceRows[0].harga_lama,
-          stock_lama: productRows[0].stock_lama,
+          harga_lama: variationRows[0].harga_lama,
+          stock_lama: variationRows[0].stock_lama,
           unit_lama: productRows[0].unit_lama,
           min_qty_lama: productRows[0].min_qty_lama,
           // New values from CSV, editable by user
-          harga_baru: record.harga_baru ?? priceRows[0].harga_lama,
-          stock: record.stock ?? productRows[0].stock_lama,
+          harga_baru: record.harga_baru ?? variationRows[0].harga_lama,
+          stock: record.stock ?? variationRows[0].stock_lama,
           unit: record.unit ?? productRows[0].unit_lama,
           min_qty: record.min_qty ?? productRows[0].min_qty_lama,
         });
