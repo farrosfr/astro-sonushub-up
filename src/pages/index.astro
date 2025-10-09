@@ -79,6 +79,17 @@ if (!session) {
         </button>
       </form>
     </article>
+
+    <article>
+        <hgroup>
+            <h4>Unduh Data</h4>
+            <p>Gunakan template untuk format unggah yang benar atau unduh daftar produk untuk melihat ID yang ada.</p>
+        </hgroup>
+        <div class="grid">
+            <button id="download-template" class="secondary outline">Unduh Template Kosong</button>
+            <a href="/api/export-products" role="button" class="secondary outline">Unduh Daftar Produk</a>
+        </div>
+    </article>
   </div>
 
   <script>
@@ -125,6 +136,23 @@ if (!session) {
                     fileNameDisplay.textContent = '';
                 }
             }
+        });
+    }
+
+    // --- Download Template Script ---
+    const downloadBtn = document.getElementById('download-template');
+    if (downloadBtn) {
+        downloadBtn.addEventListener('click', () => {
+            const headers = 'id_produk,harga_baru,stock,unit,min_qty';
+            const blob = new Blob([headers], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            const url = URL.createObjectURL(blob);
+            link.setAttribute('href', url);
+            link.setAttribute('download', 'template_update_produk.csv');
+            link.style.visibility = 'hidden';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
         });
     }
   </script>
