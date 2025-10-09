@@ -1,5 +1,10 @@
 ---
 import Layout from '../layouts/Layout.astro';
+
+const session = Astro.cookies.get('auth-session');
+if (!session) {
+    return Astro.redirect('/auth');
+}
 ---
 <Layout title="Mulai - SonusHUB Updater">
   <style>

@@ -1,0 +1,44 @@
+---
+import Layout from '../layouts/Layout.astro';
+
+const { searchParams } = Astro.url;
+const error = searchParams.get('error');
+---
+<Layout title="Login - SonusHUB Updater">
+  <style>
+    .login-wrapper {
+      max-width: 400px;
+      margin: 5rem auto;
+      text-align: center;
+    }
+    .error {
+        background-color: var(--pico-del-color);
+        color: var(--pico-del-color-inverse);
+        padding: var(--spacing);
+        border-radius: var(--border-radius);
+        margin-bottom: 1.5rem;
+    }
+    button {
+        width: 100%;
+    }
+  </style>
+
+  <div class="login-wrapper">
+    <article>
+        <hgroup>
+            <h2>Silakan Login</h2>
+            <p>Masukkan token akses untuk melanjutkan</p>
+        </hgroup>
+
+        {error && <div class="error">{error}</div>}
+
+        <form method="post" action="/api/auth/login">
+            <label for="token">
+                Token Akses
+                <input type="password" id="token" name="token" required autofocus>
+            </label>
+            <button type="submit">Login</button>
+        </form>
+    </article>
+  </div>
+</Layout>

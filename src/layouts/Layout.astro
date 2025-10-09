@@ -41,6 +41,9 @@ const { title } = Astro.props;
                             </ul>
                         </details>
                     </li>
+                    {Astro.cookies.has('auth-session') && (
+                        <li><a href="/api/auth/logout" role="button" class="secondary outline">Logout</a></li>
+                    )}
                 </ul>
             </nav>
         </header>

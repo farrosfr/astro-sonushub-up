@@ -1,9 +1,13 @@
---- 
-// --- FRONTMATTER (logic) remains the same ---
+---
 import Layout from '../layouts/Layout.astro';
 import { marked } from 'marked';
 import mysql from 'mysql2/promise';
 import Papa from 'papaparse';
+
+const session = Astro.cookies.get('auth-session');
+if (!session) {
+    return Astro.redirect('/auth');
+}
 
 
 let dataUntukUpdate: any[] = [];
