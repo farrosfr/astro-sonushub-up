@@ -48,17 +48,25 @@ if (Astro.request.method === 'POST') {
     });
 
     for (const record of parsedCsv.data as any[]) {
-      const idProduk = record.id_produk || record.ID; // Fleksibel dengan nama kolom
-      const hargaBaru = record.harga_baru;
+      const idProduk = record.id_produk || record.ID;
+      if (!idProduk) continue;
 
-      if (!idProduk || !hargaBaru) continue;
-
-      const [rows]: any = await db.execute('SELECT price AS harga_lama FROM product_variations WHERE product_id = ?', [idProduk]);
-      if (rows.length > 0) {
+      const [priceRows]: any = await db.execute('SELECT price AS harga_lama FROM product_variations WHERE product_id = ?', [idProduk]);
+      const [productRows]: any = await db.execute('SELECT stock AS stock_lama, unit AS unit_lama, min_qty AS min_qty_lama FROM products WHERE id = ?', [idProduk]);
+      
+      if (priceRows.length > 0 && productRows.length > 0) {
         dataUntukUpdate.push({
           id: idProduk,
-          harga_lama: rows[0].harga_lama,
-          harga_baru: hargaBaru,
+          // Old values from DB for display
+          harga_lama: priceRows[0].harga_lama,
+          stock_lama: productRows[0].stock_lama,
+          unit_lama: productRows[0].unit_lama,
+          min_qty_lama: productRows[0].min_qty_lama,
+          // New values from CSV, editable by user
+          harga_baru: record.harga_baru ?? priceRows[0].harga_lama,
+          stock: record.stock ?? productRows[0].stock_lama,
+          unit: record.unit ?? productRows[0].unit_lama,
+          min_qty: record.min_qty ?? productRows[0].min_qty_lama,
         });
       }
     }
@@ -69,8 +77,8 @@ if (Astro.request.method === 'POST') {
     }
 
     if (gunakanAI) {
-      const dataTeks = dataUntukUpdate.map(item => `ID: ${item.id}, Harga Lama: ${item.harga_lama}, Harga Baru: ${item.harga_baru}`).join('\n');
-      const prompt = `Anda adalah seorang analis data... (prompt lengkap Anda di sini)`;
+      const dataTeks = dataUntukUpdate.map(item => `ID: ${item.id}, Harga Lama: ${item.harga_lama}, Harga Baru: ${item.harga_baru}, Stock: ${item.stock}, Unit: ${item.unit}, Min Qty: ${item.min_qty}`).join('\n');
+      const prompt = `Anda adalah seorang analis data. Berikut adalah data perubahan harga, stok, dan kuantitas produk. Berikan rangkuman singkat, analisis potensi dampaknya (misal, kenaikan harga drastis, stok menipis), dan berikan saran atau peringatan jika ada yang terlihat tidak wajar. Fokus pada perubahan yang signifikan.\n\nData:\n${dataTeks}`;
       
       const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${import.meta.env.GEMINI_API_KEY}`, {
         method: 'POST',
@@ -105,7 +113,7 @@ if (Astro.request.method === 'POST') {
       margin-bottom: 2.5rem;
     }
     .confirmation-wrapper {
-        max-width: 800px;
+        max-width: 95%;
         margin: 0 auto;
     }
     .error-message {
@@ -114,6 +122,9 @@ if (Astro.request.method === 'POST') {
     }
     .error-message h3 {
         color: var(--pico-del-color);
+    }
+    .table-responsive {
+        overflow-x: auto;
     }
     table {
         margin-bottom: 2rem;
@@ -124,13 +135,18 @@ if (Astro.request.method === 'POST') {
     table tbody tr:nth-child(odd) {
         background-color: var(--form-element-background-color);
     }
-    .price-old {
+    td small {
+        display: block;
+        font-size: 0.8em;
         opacity: 0.8;
+        white-space: nowrap;
+    }
+    .price-old {
         text-decoration: line-through;
     }
-    .price-new {
-        font-weight: bold;
-        color: var(--primary);
+    table input {
+        min-width: 120px;
+        margin-top: 0.25rem;
     }
     .ai-summary {
         border-top: 1px solid var(--card-border-color);
@@ -160,7 +176,7 @@ if (Astro.request.method === 'POST') {
     <div class="hgroup-wrapper">
         <hgroup>
             <h2>Langkah 2: Konfirmasi Perubahan</h2>
-            <p>Periksa data di bawah ini sebelum menyimpan perubahan secara permanen.</p>
+            <p>Periksa dan ubah data di bawah ini sebelum menyimpan perubahan secara permanen.</p>
         </hgroup>
     </div>
 
@@ -172,27 +188,45 @@ if (Astro.request.method === 'POST') {
             <a href="/" role="button" class="secondary">Coba Lagi</a>
           </div>
         ) : (
-          <form action="/api/update-data" method="post">
+          <form id="confirmation-form" action="/api/update-data" method="post">
             
             <h3>Data yang Akan Diperbarui ({dataUntukUpdate.length} produk)</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>ID Produk</th>
-                  <th>Harga Lama</th>
-                  <th>Harga Baru</th>
-                </tr>
-              </thead>
-              <tbody>
-                {dataUntukUpdate.map(item => (
-                  <tr>
-                    <td><code>{item.id}</code></td>
-                    <td class="price-old">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_lama)}</td>
-                    <td class="price-new">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_baru)}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div class="table-responsive">
+                <table>
+                <thead>
+                    <tr>
+                    <th>ID Produk</th>
+                    <th>Harga</th>
+                    <th>Stock</th>
+                    <th>Unit</th>
+                    <th>Min. Qty</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {dataUntukUpdate.map(item => (
+                    <tr data-id={item.id}>
+                        <td><code>{item.id}</code></td>
+                        <td>
+                        <small class="price-old">{new Intl.NumberFormat('id-ID', { style: 'currency', currency: 'IDR', minimumFractionDigits: 0 }).format(item.harga_lama)}</small>
+                        <input type="number" name="harga_baru" value={item.harga_baru} placeholder="Harga Baru" required />
+                        </td>
+                        <td>
+                        <small>Lama: {item.stock_lama}</small>
+                        <input type="number" name="stock" value={item.stock} placeholder="Stock Baru" required />
+                        </td>
+                        <td>
+                        <small>Lama: {item.unit_lama}</small>
+                        <input type="text" name="unit" value={item.unit} placeholder="Unit Baru" required />
+                        </td>
+                        <td>
+                        <small>Lama: {item.min_qty_lama}</small>
+                        <input type="number" name="min_qty" value={item.min_qty} placeholder="Min. Qty Baru" required />
+                        </td>
+                    </tr>
+                    ))}
+                </tbody>
+                </table>
+            </div>
 
             {gunakanAI && (
               <div class="ai-summary">
@@ -204,7 +238,7 @@ if (Astro.request.method === 'POST') {
               </div>
             )}
             
-            <input type="hidden" name="data_update" value={JSON.stringify(dataUntukUpdate)}>
+            <input type="hidden" name="data_update" id="data_update_hidden">
 
             <footer>
                 <span>Total <strong>{dataUntukUpdate.length} produk</strong> akan diperbarui.</span>
@@ -218,3 +252,32 @@ if (Astro.request.method === 'POST') {
     </article>
 </div>
 </Layout>
+
+<script>
+  const form = document.getElementById('confirmation-form');
+  if (form) {
+    const hiddenInput = document.getElementById('data_update_hidden') as HTMLInputElement;
+    form.addEventListener('submit', () => {
+      const updatedData: any[] = [];
+      const rows = form.querySelectorAll('tbody tr');
+      
+      rows.forEach(row => {
+        const id = (row as HTMLElement).dataset.id;
+        const harga_baru = (row.querySelector('input[name="harga_baru"]') as HTMLInputElement).value;
+        const stock = (row.querySelector('input[name="stock"]') as HTMLInputElement).value;
+        const unit = (row.querySelector('input[name="unit"]') as HTMLInputElement).value;
+        const min_qty = (row.querySelector('input[name="min_qty"]') as HTMLInputElement).value;
+        
+        updatedData.push({ 
+          id, 
+          harga_baru: Number(harga_baru), 
+          stock: Number(stock), 
+          unit, 
+          min_qty: Number(min_qty) 
+        });
+      });
+      
+      hiddenInput.value = JSON.stringify(updatedData);
+    });
+  }
+</script>
