@@ -32,6 +32,10 @@ export const POST: APIRoute = async ({ request, redirect }) => {
     await db.rollback();
     await db.end();
     console.error(error);
-    return new Response(`Gagal menyimpan data ke database: ${error.message}`, { status: 500 });
+    let errorMessage = "Terjadi galat yang tidak diketahui";
+    if (error instanceof Error) {
+      errorMessage = error.message;
+    }
+    return new Response(`Gagal menyimpan data ke database: ${errorMessage}`, { status: 500 });
   }
 };
