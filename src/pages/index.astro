@@ -77,13 +77,13 @@ import Layout from '../layouts/Layout.astro';
   </div>
 
   <script>
-    const fileInput = document.getElementById('fileCsv');
-    const dropZone = document.getElementById('file-drop-zone');
-    const fileNameDisplay = document.getElementById('file-name-display');
+    const fileInput = document.getElementById('fileCsv') as HTMLInputElement;
+    const dropZone = document.getElementById('file-drop-zone') as HTMLLabelElement;
+    const fileNameDisplay = document.getElementById('file-name-display') as HTMLElement;
 
     if (fileInput && dropZone && fileNameDisplay) {
         fileInput.addEventListener('change', () => {
-            if (fileInput.files.length > 0) {
+            if (fileInput.files && fileInput.files.length > 0) {
                 fileNameDisplay.textContent = `File dipilih: ${fileInput.files[0].name}`;
             } else {
                 fileNameDisplay.textContent = '';
@@ -103,10 +103,22 @@ import Layout from '../layouts/Layout.astro';
         dropZone.addEventListener('drop', (e) => {
             e.preventDefault();
             dropZone.style.borderColor = 'var(--form-element-border-color)';
-            if (e.dataTransfer.files.length > 0) {
-                fileInput.files = e.dataTransfer.files;
-                const changeEvent = new Event('change');
-                fileInput.dispatchEvent(changeEvent);
+            if (e.dataTransfer && e.dataTransfer.files.length > 0) {
+                const dataTransfer = new DataTransfer();
+                const csvFile = Array.from(e.dataTransfer.files).find(
+                    file => file.name.toLowerCase().endsWith('.csv')
+                );
+
+                if (csvFile) {
+                    dataTransfer.items.add(csvFile);
+                    fileInput.files = dataTransfer.files;
+                    const changeEvent = new Event('change');
+                    fileInput.dispatchEvent(changeEvent);
+                } else {
+                    alert('Hanya file .csv yang diterima.');
+                    fileInput.value = '';
+                    fileNameDisplay.textContent = '';
+                }
             }
         });
     }
