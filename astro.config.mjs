@@ -5,5 +5,8 @@ export default defineConfig({
   output: 'server',
   adapter: node({
     mode: 'standalone',
-  })
+  }),
+  security: {
+    csrf: false
+  }
 });
