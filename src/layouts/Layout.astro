@@ -178,7 +178,7 @@ const { title } = Astro.props;
                 transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out;
             }
 
-            input, select, textarea, fieldset {
+            input:not([role="switch"]), select, textarea, fieldset {
                 background-color: var(--form-element-background-color) !important;
                 border-color: var(--form-element-border-color) !important;
                 color: var(--color) !important;
