@@ -7,6 +7,6 @@ export default defineConfig({
     mode: 'standalone',
   }),
   security: {
-    csrf: false
+    checkOrigin: false
   }
 });
