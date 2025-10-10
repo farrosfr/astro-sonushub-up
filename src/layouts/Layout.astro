@@ -37,67 +37,39 @@ const { title } = Astro.props;
         </footer>
 
 		<script>
-            interface ThemeManager {
-                themeToggle: HTMLDetailsElement | null;
-                themeLinks: NodeListOf<HTMLAnchorElement>;
-                currentTheme: string;
-                init(): void;
-                getTheme(): string;
-                setTheme(newTheme: string): void;
-                applyTheme(theme: string): void;
-            }
-
-            const theme: ThemeManager = {
-                themeToggle: null,
-                themeLinks: document.querySelectorAll('a[data-theme-switcher]'),
-                currentTheme: 'auto',
-
+            const themeManager = {
                 init() {
-                    this.themeToggle = document.querySelector('details[role="list"]');
-                    this.currentTheme = this.getTheme();
-                    this.applyTheme(this.currentTheme);
+                    const themeToggleButton = document.getElementById('theme-toggle-button');
+                    const currentTheme = this.getTheme();
+                    this.applyTheme(currentTheme);
 
-                    this.themeLinks.forEach(link => {
-                        link.addEventListener('click', e => {
-                            e.preventDefault();
-                            const target = e.target as HTMLAnchorElement;
-                            const newTheme = target.dataset.themeSwitcher;
-
-                            if (newTheme) {
-                                this.setTheme(newTheme);
-                            }
-                            
-                            if (this.themeToggle) {
-                                this.themeToggle.removeAttribute('open');
-                            }
+                    if (themeToggleButton) {
+                        themeToggleButton.addEventListener('click', () => {
+                            const newTheme = this.getTheme() === 'dark' ? 'light' : 'dark';
+                            this.setTheme(newTheme);
                         });
-                    });
+                    }
                 },
 
                 getTheme() {
-                    return localStorage.getItem('theme') || 'auto';
+                    const storedTheme = localStorage.getItem('theme');
+                    // Default to dark theme if nothing is set or value is invalid
+                    return storedTheme === 'light' ? 'light' : 'dark';
                 },
 
-                setTheme(newTheme: string) {
+                setTheme(newTheme) {
                     localStorage.setItem('theme', newTheme);
                     this.applyTheme(newTheme);
                 },
 
-                applyTheme(theme: string) {
-                    let themeToApply = theme;
-                    if (theme === 'auto') {
-                        themeToApply = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                    }
-                    document.documentElement.setAttribute('data-theme', themeToApply);
-                }
+                applyTheme(theme) {
+                    document.documentElement.setAttribute('data-theme', theme);
+                },
             };
             
-            theme.init();
-
-            window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => {
-                if (theme.getTheme() === 'auto') {
-                    theme.applyTheme('auto');
-                }
+            // Run the script after the DOM is fully loaded
+            document.addEventListener('DOMContentLoaded', () => {
+                themeManager.init();
             });
 		</script>
         <style is:global>
@@ -110,7 +82,7 @@ const { title } = Astro.props;
             }
 
             /* Dark Theme (Default) */
-            html {
+            html, html[data-theme="dark"] {
                 --background-color: #121212;
                 --color: #a0a0a0;
                 --h1-color: #ffffff;
@@ -182,21 +154,6 @@ const { title } = Astro.props;
                 background-color: var(--form-element-background-color) !important;
                 border-color: var(--form-element-border-color) !important;
                 color: var(--color) !important;
-            }
-
-            /* New Theme Switcher Dropdown */
-            details[role="list"] summary {
-                color: var(--color);
-            }
-            details[role="list"] ul {
-                background-color: var(--card-background-color);
-                border-color: var(--card-border-color);
-            }
-            details[role="list"] a {
-                color: var(--color);
-            }
-             details[role="list"] a:hover {
-                background-color: var(--form-element-background-color);
             }
 
         </style>
