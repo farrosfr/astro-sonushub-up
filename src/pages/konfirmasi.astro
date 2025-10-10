@@ -4,11 +4,6 @@ import { marked } from 'marked';
 import mysql from 'mysql2/promise';
 import Papa from 'papaparse';
 
-const session = Astro.cookies.get('auth-session');
-if (!session) {
-    return Astro.redirect('/auth');
-}
-
 
 let dataUntukUpdate: any[] = [];
 let rangkumanDariAI = 'Validasi AI tidak diaktifkan.';
