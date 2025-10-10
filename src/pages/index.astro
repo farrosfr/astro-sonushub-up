@@ -55,6 +55,13 @@ import Layout from '../layouts/Layout.astro';
     <article>
       <form action="/konfirmasi" method="post" enctype="multipart/form-data">
         
+        <fieldset style="margin-bottom: 1.5rem;">
+          <label for="authToken">
+            Token Autentikasi
+            <input type="password" name="authToken" id="authToken" placeholder="Masukkan token rahasia Anda" required>
+          </label>
+        </fieldset>
+        
         <label for="fileCsv" class="file-input-wrapper" id="file-drop-zone">
             <strong>Klik untuk memilih file atau jatuhkan file di sini</strong>
             <small>Hanya file .csv yang diterima</small>

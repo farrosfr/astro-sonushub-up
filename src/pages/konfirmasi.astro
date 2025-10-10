@@ -15,6 +15,13 @@ let error = null;
 if (Astro.request.method === 'POST') {
   try {
     const formData = await Astro.request.formData();
+    const submittedToken = formData.get('authToken') as string;
+    const serverToken = import.meta.env.AUTH_TOKEN;
+
+    if (!serverToken || submittedToken !== serverToken) {
+      throw new Error("Token autentikasi tidak valid atau tidak ada.");
+    }
+
     const file = formData.get('fileCsv') as File;
     gunakanAI = formData.get('gunakan_ai') === 'yes';
 
