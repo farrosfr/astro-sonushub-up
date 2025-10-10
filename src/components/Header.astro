@@ -1,0 +1,73 @@
+---
+// src/components/Header.astro
+---
+<header>
+    <div class="container">
+        <nav>
+            <ul>
+                <li>
+                    <a href="/" class="logo">
+                        <img src="/favicon.svg" alt="Logo" />
+                        <strong>SonusHUB Updater</strong>
+                    </a>
+                </li>
+            </ul>
+            <ul>
+                <li>
+                    <details role="list" dir="rtl">
+                        <summary aria-haspopup="listbox" role="link">Theme</summary>
+                        <ul role="listbox">
+                            <li><a href="#" data-theme-switcher="light">Light</a></li>
+                            <li><a href="#" data-theme-switcher="dark">Dark</a></li>
+                            <li><a href="#" data-theme-switcher="auto">Auto</a></li>
+                        </ul>
+                    </details>
+                </li>
+            </ul>
+        </nav>
+    </div>
+</header>
+
+<style>
+    header {
+        padding: 0.75rem 0;
+        border-bottom: 1px solid var(--card-border-color);
+        background-color: var(--card-background-color);
+        position: sticky;
+        top: 0;
+        z-index: 10;
+    }
+    .logo {
+        display: flex;
+        align-items: center;
+        gap: 0.75rem;
+        text-decoration: none;
+        color: var(--h1-color);
+    }
+    .logo img {
+        width: 28px;
+    }
+    nav {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    /* Removing default list styles */
+    nav ul {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+        display: flex;
+        align-items: center;
+    }
+    nav ul li {
+        margin: 0;
+    }
+    /* Pico.css overrides for nav */
+    nav details[role="list"] {
+        margin-bottom: 0;
+    }
+    nav details[role="list"] summary {
+        padding: 0.25rem 0.75rem;
+    }
+</style>

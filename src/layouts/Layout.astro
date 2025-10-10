@@ -3,6 +3,8 @@ interface Props {
 	title: string;
 }
 
+import Header from '../components/Header.astro';
+
 const { title } = Astro.props;
 ---
 <!doctype html>
@@ -24,27 +26,7 @@ const { title } = Astro.props;
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@picocss/pico@1/css/pico.min.css">
 	</head>
 	<body>
-        <header class="container">
-            <nav>
-                <ul>
-                    <li><img src="/favicon.svg" alt="Logo" style="width: 32px; margin-right: 1rem;"/></li>
-                    <li><strong>SonusHUB Updater</strong></li>
-                </ul>
-                <ul>
-                    <li>
-                        <details role="list" dir="rtl">
-                            <summary aria-haspopup="listbox" role="link">Theme</summary>
-                            <ul role="listbox">
-                                <li><a href="#" data-theme-switcher="light">Light</a></li>
-                                <li><a href="#" data-theme-switcher="dark">Dark</a></li>
-                                <li><a href="#" data-theme-switcher="auto">Auto</a></li>
-                            </ul>
-                        </details>
-                    </li>
-
-                </ul>
-            </nav>
-        </header>
+        <Header />
 
 		<main class="container">
             <slot />
@@ -168,7 +150,7 @@ const { title } = Astro.props;
                 padding-bottom: 4rem;
             }
 
-            header, footer {
+            footer {
                 padding: 1rem 0;
                 border-bottom: 1px solid var(--card-border-color);
             }
